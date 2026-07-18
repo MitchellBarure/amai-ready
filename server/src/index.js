@@ -17,15 +17,12 @@ const app = new Elysia()
   )
   .mount(auth.handler)
 
-  .get("/", () => ({
-    message: "AmaiReady API is running",
-  }))
 
   .get("/api/health", () => ({
     status: "success",
     message: "AmaiReady API is healthy",
   }))
-  
+
   .listen(port);
 
 console.log(`AmaiReady API running on http://localhost:${app.server.port}`);

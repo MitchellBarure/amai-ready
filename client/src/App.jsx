@@ -1,14 +1,17 @@
 import { Link, Route, Routes } from "react-router";
 
+import AuthTestPage from "@/pages/AuthTestPage";
+
 function HomePage() {
   return (
     <main className="min-h-screen bg-slate-50 p-8">
       <h1 className="text-3xl font-bold">AmaiReady</h1>
 
-      <div className="mt-6 flex gap-4">
+      <nav className="mt-6 flex gap-4">
         <Link to="/register">Register</Link>
         <Link to="/login">Log in</Link>
-      </div>
+        <Link to="/auth-test">Test authentication</Link>
+      </nav>
     </main>
   );
 }
@@ -27,6 +30,7 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth-test" element={<AuthTestPage />} />
     </Routes>
   );
 }
