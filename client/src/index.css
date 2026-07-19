@@ -1,7 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;600;700;800&family=Alegreya+Sans:wght@400;500;600;700;800;900&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/inter";
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -20,8 +22,11 @@ body {
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Inter Variable', sans-serif;
+--font-sans: "Alegreya Sans", sans-serif;
+--font-serif: "Alegreya", serif;
+  --font-heading: "Alegreya", serif;
+  --font-body: "Alegreya Sans", sans-serif;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -60,41 +65,70 @@ body {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Additional AmaiReady brand colours */
+  --color-brand-orange: #ed6e38;
+  --color-brand-coral: #fe5733;
+  --color-brand-peach: #faae69;
+  --color-brand-brown: #97403a;
+  --color-brand-gold: #feeaa2;
+  --color-brand-tan: #c18e6c;
+  --color-brand-olive: #86795b;
+  --color-brand-red: #ee4750;
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+
+  /* Main surfaces */
+  --background: #fff8f3;
+  --foreground: #321815;
+
+  --card: #fffdfb;
+  --card-foreground: #321815;
+
+  --popover: #fffdfb;
+  --popover-foreground: #321815;
+
+  /* Main AmaiReady brand colour */
+  --primary: #c32c3e;
+  --primary-foreground: #ffffff;
+
+  /* Soft supporting colours */
+  --secondary: #feeaa2;
+  --secondary-foreground: #4a211c;
+
+  --muted: #f8e5dc;
+  --muted-foreground: #86795b;
+
+  --accent: #faae69;
+  --accent-foreground: #4a211c;
+
+  /* Form and interaction colours */
+  --border: #e9cfc3;
+  --input: #e9cfc3;
+  --ring: #c32c3e;
+
+  /* Errors */
+  --destructive: #ee4750;
+  --destructive-foreground: #ffffff;
+
+  /* Charts */
+  --chart-1: #c32c3e;
+  --chart-2: #ed6e38;
+  --chart-3: #faae69;
+  --chart-4: #97403a;
+  --chart-5: #86795b;
+
+  /* Sidebar */
+  --sidebar: #fff4ed;
+  --sidebar-foreground: #321815;
+  --sidebar-primary: #c32c3e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #feeaa2;
+  --sidebar-accent-foreground: #4a211c;
+  --sidebar-border: #e9cfc3;
+  --sidebar-ring: #c32c3e;
 }
 
 .dark {
@@ -135,10 +169,22 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+
   html {
     @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
   }
 }
