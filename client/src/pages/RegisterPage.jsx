@@ -1,11 +1,13 @@
 import {useState } from "react";
-import { Link } from "react-router";
+import { Link,  useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { registerSchema } from "@/lib/validation/register-schema";
+
+import { authClient } from "@/lib/auth-client";
 
 import {
   Card,
@@ -17,6 +19,8 @@ import {
 
 import {
   HeartIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 
 const initialFormData = {
@@ -26,24 +30,43 @@ const initialFormData = {
   confirmPassword: "",
 };
 
-function handleChange(event) {
-  const { name, value } = event.target;
 
-  setFormData((currentData) => ({
-    ...currentData,
-    [name]: value,
-  }));
 
-  if (errors[name]) {
-    setErrors((currentErrors) => ({
-      ...currentErrors,
-      [name]: "",
+function RegisterPage() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState(initialFormData);
+  const [errors, setErrors] = useState({});
+
+  const [authError, setAuthError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setFormData((currentData) => ({
+      ...currentData,
+      [name]: value,
     }));
-  }
-}
 
-function handleSubmit(event) {
+    if (errors[name]) {
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        [name]: "",
+      }));
+    }
+
+    if (authError) {
+      setAuthError("");
+    }
+  }
+
+  async function handleSubmit(event) {
   event.preventDefault();
+
+  setAuthError("");
 
   const result = registerSchema.safeParse(formData);
 
@@ -63,13 +86,40 @@ function handleSubmit(event) {
   }
 
   setErrors({});
+  setIsSubmitting(true);
 
-  console.log("Valid registration data:", result.data);
+  try {
+    const { data, error } = await authClient.signUp.email({
+      name: result.data.fullName,
+      email: result.data.email,
+      password: result.data.password,
+    });
+
+    if (error) {
+      setAuthError(
+        error.message ||
+          "Your account could not be created. Please try again.",
+      );
+      return;
+    }
+
+    console.log("Account created successfully:", data);
+
+    setFormData(initialFormData);
+
+    navigate("/auth-test", {
+      replace: true,
+    });
+  } catch (error) {
+    console.error("Registration request failed:", error);
+
+    setAuthError(
+      "The server could not be reached. Please try again.",
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
 }
-
-function RegisterPage() {
-  const [formData, setFormData] = useState(initialFormData);
-  const [errors, setErrors] = useState({});
 
   return (
     <main className="min-h-dvh overflow-x-clip bg-background xl:grid xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
@@ -120,7 +170,7 @@ function RegisterPage() {
       </aside>
 
       {/* Form section */}
-        <section className="flex min-h-dvh min-w-0 items-start justify-center px-4 py-6 sm:px-6 sm:py-10 xl:items-center xl:px-12 2xl:px-20">       
+        <section className="flex min-h-dvh min-w-0 items-center justify-center px-4 py-6 sm:px-6 sm:py-10 xl:items-center xl:px-12 2xl:px-20">       
              <div className="w-full min-w-0 max-w-xl">
           {/* Mobile styling */}
           <div className="mb-6 xl:hidden">
@@ -165,6 +215,7 @@ function RegisterPage() {
   className="w-full min-w-0 space-y-4 sm:space-y-5"
   onSubmit={handleSubmit}
   noValidate
+
 >  {/* Full name */}
   <div className="space-y-2">
     <Label htmlFor="full-name">
@@ -227,10 +278,11 @@ function RegisterPage() {
 <div className="space-y-2">
   <Label htmlFor="password">Password</Label>
 
+  <div className="relative">
   <Input
     id="password"
     name="password"
-    type="password"
+    type={showPassword ? "text" : "password"}
     placeholder="Create a password"
     autoComplete="new-password"
     value={formData.password}
@@ -239,8 +291,23 @@ function RegisterPage() {
     aria-describedby={
       errors.password ? "password-error" : "password-help"
     }
-    className="h-11 w-full min-w-0 bg-background sm:h-12"
+    className="h-11 w-full min-w-0 bg-background pr-12 sm:h-12"
   />
+
+  <button
+    type="button"
+    onClick={() => setShowPassword((currentValue) => !currentValue)}
+    aria-label={showPassword ? "Hide password" : "Show password"}
+    aria-pressed={showPassword}
+    className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  >
+    {showPassword ? (
+      <EyeSlashIcon className="size-5" aria-hidden="true" />
+    ) : (
+      <EyeIcon className="size-5" aria-hidden="true" />
+    )}
+  </button>
+</div>
 
   {errors.password ? (
     <p
@@ -261,48 +328,78 @@ function RegisterPage() {
 </div>
 
   {/* Confirm password */}
-  <div className="space-y-2">
-  <Label htmlFor="password">Password</Label>
+<div className="space-y-2">
+  <Label htmlFor="confirm-password">
+    Confirm password
+  </Label>
 
+  <div className="relative">
   <Input
-    id="password"
-    name="password"
-    type="password"
-    placeholder="Create a password"
+    id="confirm-password"
+    name="confirmPassword"
+    type={showConfirmPassword ? "text" : "password"}
+    placeholder="Enter your password again"
     autoComplete="new-password"
-    value={formData.password}
+    value={formData.confirmPassword}
     onChange={handleChange}
-    aria-invalid={Boolean(errors.password)}
+    aria-invalid={Boolean(errors.confirmPassword)}
     aria-describedby={
-      errors.password ? "password-error" : "password-help"
+      errors.confirmPassword
+        ? "confirm-password-error"
+        : undefined
     }
-    className="h-11 w-full min-w-0 bg-background sm:h-12"
+    className="h-11 w-full min-w-0 bg-background pr-12 sm:h-12"
   />
 
-  {errors.password ? (
+  <button
+    type="button"
+    onClick={() =>
+      setShowConfirmPassword((currentValue) => !currentValue)
+    }
+    aria-label={
+      showConfirmPassword
+        ? "Hide confirmed password"
+        : "Show confirmed password"
+    }
+    aria-pressed={showConfirmPassword}
+    className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  >
+    {showConfirmPassword ? (
+      <EyeSlashIcon className="size-5" aria-hidden="true" />
+    ) : (
+      <EyeIcon className="size-5" aria-hidden="true" />
+    )}
+  </button>
+</div>
+
+  {errors.confirmPassword && (
     <p
-      id="password-error"
+      id="confirm-password-error"
       className="text-sm font-medium text-destructive"
       role="alert"
     >
-      {errors.password}
-    </p>
-  ) : (
-    <p
-      id="password-help"
-      className="text-sm text-muted-foreground"
-    >
-      Use at least 8 characters.
+      {errors.confirmPassword}
     </p>
   )}
 </div>
 
+{/* Better Auth error */}
+{authError && (
+  <div
+    className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
+    role="alert"
+  >
+    {authError}
+  </div>
+)}
+
   {/* Submit button */}
   <Button
     type="submit"
-    className="h-12 w-full text-base font-bold sm:h-12"
+    disabled={isSubmitting}
+    className="h-11 w-full text-base font-bold sm:h-12"
   >
-    Create Account
+    {isSubmitting ? "Creating account..." : "Create Account"}
   </Button>
 </form>
 
@@ -312,7 +409,7 @@ function RegisterPage() {
                   to="/login"
                   className="font-bold text-primary underline-offset-4 hover:underline"
                 >
-                  Log in
+                  Login
                 </Link>
               </p>
             </CardContent>
@@ -324,35 +421,3 @@ function RegisterPage() {
 }
 
 export default RegisterPage;
-
-
-export const registerSchema = z
-  .object({
-    fullName: z
-      .string()
-      .trim()
-      .min(2, "Please enter your full name.")
-      .max(100, "Your name must be 100 characters or fewer."),
-
-    email: z
-      .string()
-      .trim()
-      .email("Please enter a valid email address.")
-      .max(254, "Your email address is too long."),
-
-    password: z
-      .string()
-      .min(8, "Your password must contain at least 8 characters.")
-      .max(128, "Your password must contain no more than 128 characters."),
-
-    confirmPassword: z
-      .string()
-      .min(1, "Please confirm your password."),
-  })
-  .refine(
-    (values) => values.password === values.confirmPassword,
-    {
-      message: "The passwords do not match.",
-      path: ["confirmPassword"],
-    },
-  );

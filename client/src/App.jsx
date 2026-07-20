@@ -2,6 +2,7 @@ import { Link, Route, Routes } from "react-router";
 
 import AuthTestPage from "@/pages/AuthTestPage";
 import RegisterPage from "@/pages/RegisterPage";
+import LoginPage from "@/pages/LoginPage";
 
 
 function HomePage() {
@@ -30,11 +31,6 @@ function HomePage() {
   );
 }
 
-
-
-function LoginPage() {
-  return <h1 className="p-8 text-2xl font-bold">Log in</h1>;
-}
 
 function App() {
   return (
