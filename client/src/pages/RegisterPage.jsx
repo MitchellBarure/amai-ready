@@ -1,5 +1,5 @@
 import {useState } from "react";
-import { Link,  useNavigate } from "react-router";
+import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { registerSchema } from "@/lib/validation/register-schema";
 
 import { authClient } from "@/lib/auth-client";
+
+import { getHomeRoute } from "@/lib/auth-routes";
 
 import {
   Card,
@@ -33,7 +35,7 @@ const initialFormData = {
 
 
 function RegisterPage() {
-  const navigate = useNavigate();
+  
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
 
@@ -103,13 +105,28 @@ function RegisterPage() {
       return;
     }
 
-    console.log("Account created successfully:", data);
+    const {
+      data: session,
+      error: sessionError,
+    } = await authClient.getSession({
+      query: {
+        disableCookieCache: true,
+      },
+    });
+
+    if (sessionError || !session) {
+      setAuthError(
+        "Your account was created, but your session could not be confirmed. Please log in.",
+      );
+      return;
+    }
 
     setFormData(initialFormData);
 
-    navigate("/auth-test", {
-      replace: true,
-    });
+    const destination = getHomeRoute(session.user?.role);
+
+    window.location.replace(destination);
+
   } catch (error) {
     console.error("Registration request failed:", error);
 

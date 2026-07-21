@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
+import { getHomeRoute } from "@/lib/auth-routes";
 
 
 import {
@@ -28,7 +29,6 @@ const initialFormData = {
 };
 
 function LoginPage() {
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
@@ -83,25 +83,40 @@ function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await authClient.signIn.email({
-        email: result.data.email,
-        password: result.data.password,
-      });
+        const { data, error } = await authClient.signIn.email({
+          email: result.data.email,
+          password: result.data.password,
+        });
 
-      if (error) {
-        setAuthError(
-          error.message || "The email or password is incorrect.",
-        );
-        return;
-      }
+        if (error) {
+          setAuthError(
+            error.message || "The email or password is incorrect.",
+          );
+          return;
+        }
 
-      console.log("Login successful:", data);
+        const {
+    data: session,
+    error: sessionError,
+  } = await authClient.getSession({
+    query: {
+      disableCookieCache: true,
+    },
+  });
 
-      setFormData(initialFormData);
+  if (sessionError || !session) {
+    setAuthError(
+      "Your login succeeded, but the session could not be confirmed. Please try again.",
+    );
+    return;
+  }
 
-      navigate("/auth-test", {
-        replace: true,
-      });
+  setFormData(initialFormData);
+
+  const destination = getHomeRoute(session.user?.role);
+
+  window.location.replace(destination);
+
     } catch (error) {
       console.error("Login request failed:", error);
 

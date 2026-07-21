@@ -4,6 +4,10 @@ import AuthTestPage from "@/pages/AuthTestPage";
 import RegisterPage from "@/pages/RegisterPage";
 import LoginPage from "@/pages/LoginPage";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import DashboardPage from "@/pages/DashboardPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
+
 
 function HomePage() {
   return (
@@ -14,6 +18,13 @@ function HomePage() {
         <Link to="/register">Register</Link>
         <Link to="/login">Log in</Link>
         <Link to="/auth-test">Test authentication</Link>
+
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
       </nav>
 
       <p className="text-sm uppercase tracking-widest">
@@ -39,6 +50,22 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/auth-test" element={<AuthTestPage />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["mother"]}>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
